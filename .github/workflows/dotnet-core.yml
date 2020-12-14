@@ -20,6 +20,6 @@ jobs:
     - name: Install dependencies
       run: dotnet restore ./AcTransitMap.sln
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release --no-restore ./AcTransitMap.sln
     - name: Test
-      run: dotnet test --no-restore --verbosity normal
+      run: dotnet test --no-restore --verbosity normal ./AcTransitMap.sln
