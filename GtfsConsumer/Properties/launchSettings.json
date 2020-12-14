@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "GtfsConsumer": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "RABBIT_USER": "guest",
+        "ACTRANSIT_KEY": "2C7DE00B1CC93558E4F7967C399C17A8",
+        "RABBIT_PASS": "guest"
+      },
+      "remoteDebugEnabled": false
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

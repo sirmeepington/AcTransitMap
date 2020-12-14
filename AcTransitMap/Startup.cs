@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -25,6 +26,26 @@ namespace AcTransitMap
         {
             services.AddControllersWithViews();
 
+            services.AddMassTransit(cfg =>
+            {
+                cfg.AddBus(ConfigureBus);
+            });
+
+            services.AddMassTransitHostedService();
+
+        }
+
+        private IBusControl ConfigureBus(IBusRegistrationContext arg)
+        {
+            return Bus.Factory.CreateUsingRabbitMq(cfg =>
+            {
+                //TODO: Make host, user and pass env vars.
+                cfg.Host("rabbitmq.service", "/", rabbitCfg =>
+                 {
+                     rabbitCfg.Username("guest");
+                     rabbitCfg.Password("guest");
+                 });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
