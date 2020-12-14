@@ -1,0 +1,56 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model IEnumerable<AcTransitMap.Models.VehiclePosition>
+<style>
+    #map-canvas {
+        height: 500px;
+    }
+</style>
+
+<div id="map-canvas"></div>
+
+@section scripts {
+    <script src="https://maps.googleapis.com/maps/api/js"></script>
+    <script>
+    var locations = @Html.Raw(Json.Serialize(Model))
+
+        $(document).ready(function () {
+            // execute
+            (function () {
+                // map options
+                var options = {
+                    zoom: 5,
+                    center: new google.maps.LatLng(45.1479007, 7.4386887),
+                    mapTypeId: google.maps.MapTypeId.TERRAIN,
+                    mapTypeControl: false
+                };
+
+                // init map
+                var map = new google.maps.Map(document.getElementById('map-canvas'), options);
+
+                for (var i = 0; i < locations.length; i++) {
+                    // init markers
+                    var marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(locations[i].Latitude, locations[i].Longitude),
+                        map: map,
+                        title: "Vehicle "+locations[i].VehicleId
+                    });
+
+                    // process multiple info windows
+                    (function (marker, i) {
+                        // add click event
+                        google.maps.event.addListener(marker, 'click', function () {
+                            infowindow = new google.maps.InfoWindow({
+                                content: locations[i].VehicleId + " as of " + locations[i].LastUpdated
+                            });
+                            infowindow.open(map, marker);
+                        });
+                    })(marker, i);
+                }
+            })();
+        });
+
+    </script>
+
+}
