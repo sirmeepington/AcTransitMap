@@ -9,7 +9,7 @@ namespace GtfsConsumer
     public interface ITransitConsumer
     {
         IEnumerable<IAlert> GetAlerts();
-        IEnumerable<ITripUpdate> GetTripUpdates();
+        Task<IEnumerable<ITripUpdate>> GetTripUpdates();
         Task<IEnumerable<IVehiclePosition>> GetVehiclePositions();
     }
 }

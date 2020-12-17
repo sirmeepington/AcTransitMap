@@ -1,6 +1,5 @@
 ﻿using AcTransitMap.Models;
 using GtfsConsumer.Entities.Interfaces;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,11 +10,9 @@ namespace AcTransitMap.Services
     public class PositionService : IPositionService
     {
         private readonly ConcurrentDictionary<string, VehiclePosition> _positions;
-        private readonly ILogger<PositionService> _logger;
 
-        public PositionService(ILogger<PositionService> logger)
+        public PositionService()
         {
-            _logger = logger;
             _positions = new ConcurrentDictionary<string, VehiclePosition>();
         }
 
@@ -28,8 +25,10 @@ namespace AcTransitMap.Services
         {
             if (!_positions.TryGetValue(pos.VehicleId, out VehiclePosition vehiclePos))
             {
-                vehiclePos = new VehiclePosition();
-                vehiclePos.VehicleId = pos.VehicleId;
+                vehiclePos = new VehiclePosition
+                {
+                    VehicleId = pos.VehicleId
+                };
             }
 
             vehiclePos.Latitude = pos.Latitude;

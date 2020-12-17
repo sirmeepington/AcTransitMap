@@ -16,7 +16,7 @@ namespace GtfsConsumer
 
         public AcTransitConsumer(string apiKey)
         {
-            _apiKey = apiKey;
+            _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
         }
 
         public async Task<IEnumerable<IVehiclePosition>> GetVehiclePositions()
@@ -57,10 +57,11 @@ namespace GtfsConsumer
             throw new NotImplementedException();
         }
 
-        public IEnumerable<ITripUpdate> GetTripUpdates()
+        public async Task<IEnumerable<ITripUpdate>> GetTripUpdates()
         {
             WebRequest req = HttpWebRequest.Create($"https://api.actransit.org/transit/gtfsrt/tripupdates?token={_apiKey}");
-            FeedMessage message = Serializer.Deserialize<FeedMessage>(req.GetResponse().GetResponseStream());
+            var res = await req.GetResponseAsync();
+            FeedMessage message = Serializer.Deserialize<FeedMessage>(res.GetResponseStream());
             return FormUpdates(message);
         }
 
