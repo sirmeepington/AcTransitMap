@@ -2,6 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AcTransitMap.Consumers;
+using AcTransitMap.Services;
+using GreenPipes;
+using GtfsConsumer.Entities.Interfaces;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -26,26 +30,31 @@ namespace AcTransitMap
         {
             services.AddControllersWithViews();
 
+            services.AddScoped<VehiclePositionConsumer>();
+
             services.AddMassTransit(cfg =>
             {
-                cfg.AddBus(ConfigureBus);
+                cfg.UsingRabbitMq((context, rabbit) =>
+                {
+                    //TODO: Make host, user and pass env vars.
+                    rabbit.Host("rabbitmq.service", "/", rabbitCfg =>
+                    {
+                        rabbitCfg.Username("guest");
+                        rabbitCfg.Password("guest");
+                    });
+
+                    rabbit.ReceiveEndpoint(endpoint =>
+                    {
+                        endpoint.Bind<IVehiclePosition>();
+                        endpoint.Consumer<VehiclePositionConsumer>(context);
+                    });
+                });
             });
 
             services.AddMassTransitHostedService();
 
-        }
+            services.AddSingleton<IPositionService, PositionService>();
 
-        private IBusControl ConfigureBus(IBusRegistrationContext arg)
-        {
-            return Bus.Factory.CreateUsingRabbitMq(cfg =>
-            {
-                //TODO: Make host, user and pass env vars.
-                cfg.Host("rabbitmq.service", "/", rabbitCfg =>
-                 {
-                     rabbitCfg.Username("guest");
-                     rabbitCfg.Password("guest");
-                 });
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
