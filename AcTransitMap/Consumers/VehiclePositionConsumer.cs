@@ -8,10 +8,12 @@ namespace AcTransitMap.Consumers
 {
     public class VehiclePositionConsumer : IConsumer<IVehiclePosition>
     {
+        private readonly ILogger<VehiclePositionConsumer> _logger;
         private readonly IPositionService _positionService;
 
-        public VehiclePositionConsumer(IPositionService positionService)
+        public VehiclePositionConsumer(ILogger<VehiclePositionConsumer> logger, IPositionService positionService)
         {
+            _logger = logger;
             _positionService = positionService;
         }
 

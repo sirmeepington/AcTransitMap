@@ -11,6 +11,11 @@ services:
       dockerfile: AcTransitMap/Dockerfile
     networks:
       - app
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - SEQ_URL=http://seq.service:5341
     depends_on:
       - 'rabbitmq.service'
       - 'seq.service'
@@ -19,7 +24,6 @@ services:
     image: masstransit/rabbitmq
     ports:
       - "15672:15672"
-      - "5672:5672"
     networks:
       - app
     healthcheck:
@@ -31,10 +35,11 @@ services:
   seq.service:
     image: datalust/seq:latest
     ports:
-      - "5341:5341"
-      - "8001:80"
+      - "81:80"
     networks:
       - app
+    volumes:
+      - /var/opt/seq/data:/data
     environment:
       - ACCEPT_EULA=Y
 
@@ -48,6 +53,7 @@ services:
     environment:
       - RABBIT_USER=guest
       - RABBIT_PASS=guest
+      - SEQ_URL=http://seq.service:5341
     depends_on:
       - 'rabbitmq.service'
       - 'seq.service'
