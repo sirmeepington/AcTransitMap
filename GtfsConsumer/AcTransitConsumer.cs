@@ -19,12 +19,17 @@ namespace GtfsConsumer
             _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
         }
 
-        public async Task<IEnumerable<IVehiclePosition>> GetVehiclePositions()
+        private async Task<FeedMessage> GatherMessage(string endpoint)
         {
-            WebRequest webReq = HttpWebRequest.Create($"https://api.actransit.org/transit/gtfsrt/vehicles?token={_apiKey}");
+            WebRequest webReq = HttpWebRequest.Create($"https://api.actransit.org/transit/gtfsrt/{endpoint}?token={_apiKey}");
             var response = await webReq.GetResponseAsync();
             FeedMessage message = Serializer.Deserialize<FeedMessage>(response.GetResponseStream());
-            return FormVehiclePositions(message);
+            return message;
+        }
+
+        public async Task<IEnumerable<IVehiclePosition>> GetVehiclePositions()
+        {
+            return FormVehiclePositions(await GatherMessage("vehicles"));
         }
 
         private IEnumerable<IVehiclePosition> FormVehiclePositions(FeedMessage message)
@@ -59,10 +64,7 @@ namespace GtfsConsumer
 
         public async Task<IEnumerable<ITripUpdate>> GetTripUpdates()
         {
-            WebRequest req = HttpWebRequest.Create($"https://api.actransit.org/transit/gtfsrt/tripupdates?token={_apiKey}");
-            var res = await req.GetResponseAsync();
-            FeedMessage message = Serializer.Deserialize<FeedMessage>(res.GetResponseStream());
-            return FormUpdates(message);
+            return FormUpdates(await GatherMessage("tripupdates"));
         }
 
         private IEnumerable<ITripUpdate> FormUpdates(FeedMessage message)
