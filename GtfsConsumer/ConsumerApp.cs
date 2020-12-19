@@ -1,8 +1,10 @@
 ﻿using GtfsConsumer.Entities;
 using GtfsConsumer.Entities.Interfaces;
+using GtfsConsumer.Services;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GtfsConsumer
@@ -21,13 +23,9 @@ namespace GtfsConsumer
             // Logging
             InitLogging();
 
+            IConsumerBus consumer = await CreateAndStartBus();
+
             string apiKey = Environment.GetEnvironmentVariable("ACTRANSIT_KEY");
-            string user = Environment.GetEnvironmentVariable("RABBIT_USER");
-            string pass = Environment.GetEnvironmentVariable("RABBIT_PASS");
-
-            IConsumerBus consumer = new ConsumerBus("rabbitmq.service", user, pass);
-            await consumer.Start();
-
             ITransitConsumer acTransit = null;
             try
             {
@@ -38,33 +36,30 @@ namespace GtfsConsumer
             {
                 Log.Error("A(n) {ExceptionType} occured while accessing the ACTransit GTFS-RT endpoint: {ExceptionMessage}.", ex.GetType().Name, ex.Message);
             }
+            ConsumerService service = new ConsumerService(acTransit,consumer);
 
-            List<IVehiclePosition> vehicles;
-            try
-            {
-                vehicles = (List<IVehiclePosition>)await acTransit.GetVehiclePositions();
-                Log.Information("Retrieved {VehicleAmount} vehicles from the GTFS-RT feed.", vehicles.Count);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("A(n) {ExceptionType} occured while retrieving ACTransit vehicle positions: {ExceptionMessage}.", ex.GetType().Name, ex.Message);
-                return;
-            }
-
-            Log.Information("Publishing {VehicleAmount} vehicles to the message queue.", vehicles.Count);
-            foreach (IVehiclePosition pos in vehicles)
-            {
-                await consumer.Publish(pos);
-            }
+            // Call every 30s
+            Timer timer = new Timer(new TimerCallback(service.Publish),null,0,30000);
 
             try
             {
-                Console.WriteLine("Done.");
+                await Task.Delay(Timeout.Infinite);
             }
             finally
             {
+                Log.Information("Closing the Gtfs Consumer");
                 await consumer.Stop();
             }
+        }
+
+        private static async Task<IConsumerBus> CreateAndStartBus()
+        {
+
+            string rabbitUser = Environment.GetEnvironmentVariable("RABBIT_USER");
+            string rabbitPass = Environment.GetEnvironmentVariable("RABBIT_PASS");
+            IConsumerBus consumer = new ConsumerBus("rabbitmq.service", rabbitUser, rabbitPass);
+            await consumer.Start();
+            return consumer;
         }
 
         private static void InitLogging()
