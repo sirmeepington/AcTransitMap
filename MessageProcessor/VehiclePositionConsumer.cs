@@ -11,13 +11,11 @@ namespace MessageProcessor
 {
     public class VehiclePositionConsumer : IConsumer<IVehiclePosition>
     {
-        private readonly IDbConnector<UpdatedVehiclePosition, string> _database;
-        private readonly IBusControl _bus;
+        private readonly IUpdaterService _updater;
 
-        public VehiclePositionConsumer(IDbConnector<UpdatedVehiclePosition, string> database, IBusControl bus)
+        public VehiclePositionConsumer(IUpdaterService updater)
         {
-            _database = database;
-            _bus = bus;
+            _updater = updater;
         }
 
         public async Task Consume(ConsumeContext<IVehiclePosition> context)
@@ -31,21 +29,7 @@ namespace MessageProcessor
                 return;
             }
 
-            UpdatedVehiclePosition existing = await _database.Get(message.VehicleId);
-
-            IUpdatedVehiclePosition newVehiclePos = new UpdatedVehiclePosition()
-            {
-                VehicleId = message.VehicleId,
-                Timestamp = DateTime.UtcNow,
-                Latitude = message.Latitude,
-                Longitude = message.Longitude
-            };
-
-            // Update
-            await _database.Update(message.VehicleId, (UpdatedVehiclePosition) newVehiclePos);
-
-            await _bus.Publish(newVehiclePos);
-
+            await _updater.Update(context.Message);
         }
     }
 }

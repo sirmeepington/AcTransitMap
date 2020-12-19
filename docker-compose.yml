@@ -15,11 +15,12 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      - RABBIT_PASS=guest
-      - RABBIT_USER=guest
-      - MONGO_DB=actransitmap
-      - MONGO_COLLECTION=positions
-      - SEQ_URL=http://seq.service:5341
+      - RABBIT_PASS=${RABBIT_PASS}
+      - RABBIT_USER=${RABBIT_USER}
+      - MONGO_CONNSTR=${MONGO_CONNSTR}
+      - MONGO_DB=${MONGO_DB}
+      - MONGO_COLLECTION=${MONGO_COLLECTION}
+      - SEQ_URL=${SEQ_URL}
     depends_on:
       - 'rabbitmq.service'
       - 'seq.service'
@@ -55,9 +56,10 @@ services:
     networks:
       - app
     environment:
-      - RABBIT_USER=guest
-      - RABBIT_PASS=guest
-      - SEQ_URL=http://seq.service:5341
+      - RABBIT_PASS=${RABBIT_PASS}
+      - RABBIT_USER=${RABBIT_USER}
+      - SEQ_URL=${SEQ_URL}
+      - ACTRANSIT_KEY=${ACTRANSIT_KEY}
     depends_on:
       - 'rabbitmq.service'
       - 'seq.service'
@@ -70,11 +72,12 @@ services:
     networks:
       - app
     environment:
-      - RABBIT_USER=guest
-      - RABBIT_PASS=guest
-      - MONGO_DB=actransitmap
-      - MONGO_COLLECTION=positions
-      - SEQ_URL=http://seq.service:5341
+      - RABBIT_PASS=${RABBIT_PASS}
+      - RABBIT_USER=${RABBIT_USER}
+      - MONGO_CONNSTR=${MONGO_CONNSTR}
+      - MONGO_DB=${MONGO_DB}
+      - MONGO_COLLECTION=${MONGO_COLLECTION}
+      - SEQ_URL=${SEQ_URL}
     depends_on:
       - 'rabbitmq.service'
       - 'seq.service'

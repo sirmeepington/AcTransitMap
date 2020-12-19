@@ -29,6 +29,21 @@ namespace MessageProcessor
             ConfigureServices(services);
 
             IServiceProvider provider = services.BuildServiceProvider();
+
+            Log.Information("Started MessageProcessor.");
+            try
+            {
+                await provider.GetRequiredService<IBusControl>().StartAsync();
+                Console.Read();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex,"A(n) {ExceptionType} occured while starting the message bus: {ExceptionMessage}.", ex.GetType().Name, ex.Message);
+            }
+            finally
+            {
+                await provider.GetRequiredService<IBusControl>().StopAsync();
+            }
         }
 
         private static void ConfigureServices(IServiceCollection services)
@@ -47,6 +62,8 @@ namespace MessageProcessor
             string mongoColl = Environment.GetEnvironmentVariable("MONGO_COLLECTION");
 
             services.AddSingleton<IDbConnector<UpdatedVehiclePosition, string>, MongoDbConnector>(x => new MongoDbConnector(mongoUrl,mongoDb,mongoColl));
+            services.AddScoped<IUpdaterService, UpdaterService>();
+            services.AddScoped<VehiclePositionConsumer>(); // Necessary to prevent MT DI faults.
             services.AddMassTransit(mt =>
             {
                 mt.UsingRabbitMq((context, rabbit) => {
