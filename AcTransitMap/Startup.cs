@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AcTransitMap.Consumers;
+using AcTransitMap.Database;
 using AcTransitMap.Services;
 using GreenPipes;
 using GtfsConsumer.Entities.Interfaces;
@@ -32,6 +33,9 @@ namespace AcTransitMap
 
             services.AddScoped<VehiclePositionConsumer>();
 
+            string rabbitUser = Environment.GetEnvironmentVariable("RABBIT_USER");
+            string rabbitPass = Environment.GetEnvironmentVariable("RABBIT_PASS");
+
             services.AddMassTransit(cfg =>
             {
                 cfg.UsingRabbitMq((context, rabbit) =>
@@ -39,13 +43,13 @@ namespace AcTransitMap
                     //TODO: Make host, user and pass env vars.
                     rabbit.Host("rabbitmq.service", "/", rabbitCfg =>
                     {
-                        rabbitCfg.Username("guest");
-                        rabbitCfg.Password("guest");
+                        rabbitCfg.Username(rabbitUser);
+                        rabbitCfg.Password(rabbitPass);
                     });
 
                     rabbit.ReceiveEndpoint(endpoint =>
                     {
-                        endpoint.Bind<IVehiclePosition>();
+                        endpoint.Bind<IUpdatedVehiclePosition>();
                         endpoint.Consumer<VehiclePositionConsumer>(context);
                     });
                 });
@@ -53,8 +57,13 @@ namespace AcTransitMap
 
             services.AddMassTransitHostedService();
 
-            services.AddSingleton<IPositionService, PositionService>();
+            string mongoUrl = Environment.GetEnvironmentVariable("MONGO_CONNSTR");
+            string mongoDb = Environment.GetEnvironmentVariable("MONGO_DB");
+            string mongoColl = Environment.GetEnvironmentVariable("MONGO_COLLECTION");
 
+            services.AddSingleton<IDbConnector<UpdatedVehiclePosition, string>, MongoDbConnector>(x => new MongoDbConnector(mongoUrl,mongoDb,mongoColl));
+
+            services.AddSingleton<IPositionService, PositionService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

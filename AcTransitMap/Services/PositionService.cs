@@ -1,10 +1,14 @@
-﻿using AcTransitMap.Models;
+﻿using AcTransitMap.Database;
+using AcTransitMap.Models;
 using GtfsConsumer.Entities.Interfaces;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AcTransitMap.Services
 {
@@ -12,11 +16,37 @@ namespace AcTransitMap.Services
     {
         private readonly ConcurrentDictionary<string, VehiclePosition> _positions;
         private readonly ILogger<PositionService> _logger;
+        private readonly IDbConnector<UpdatedVehiclePosition, string> _database;
+        private bool gathered = false;
 
-        public PositionService(ILogger<PositionService> logger)
+        public PositionService(ILogger<PositionService> logger, IDbConnector<UpdatedVehiclePosition, string> database)
         {
             _positions = new ConcurrentDictionary<string, VehiclePosition>();
             _logger = logger;
+            _database = database;
+        }
+
+        public async Task GatherInitialValuesAsync()
+        {
+            if (gathered)
+                return;
+            // TODO: Make this gather the initial values from the database to populate before messages come through.
+            // This should be faster than the time it takes for messages to propogate and process; otherwise there
+            // may be some conflicts on data.
+            IEnumerable<UpdatedVehiclePosition> positions = await _database.GetAll();
+
+            foreach(UpdatedVehiclePosition vehiclePos in positions)
+            {
+                VehiclePosition newPos = new VehiclePosition()
+                {
+                    VehicleId = vehiclePos.VehicleId,
+                    LastUpdated = DateTime.UtcNow.ToString("G"),
+                    Latitude = vehiclePos.Latitude,
+                    Longitude = vehiclePos.Longitude
+                };
+                _positions.TryAdd(vehiclePos.VehicleId, newPos);
+            }
+            gathered = true;
         }
 
         public IEnumerable<VehiclePosition> GetPositions()
@@ -24,7 +54,7 @@ namespace AcTransitMap.Services
             return _positions.Values.ToList();
         }
 
-        public void UpdateVehiclePosition(IVehiclePosition pos)
+        public void UpdateVehiclePosition(IUpdatedVehiclePosition pos)
         {
             if (!_positions.TryGetValue(pos.VehicleId, out VehiclePosition vehiclePos))
             {

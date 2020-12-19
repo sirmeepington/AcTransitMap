@@ -3,13 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30621.155
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AcTransitMap", "AcTransitMap\AcTransitMap.csproj", "{2A1905FB-014F-4297-9E1A-0E26D80AC213}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AcTransitMap", "AcTransitMap\AcTransitMap.csproj", "{2A1905FB-014F-4297-9E1A-0E26D80AC213}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{BDC9574E-F6B1-4EC5-B05D-BBD33BEA22A9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GtfsConsumer", "GtfsConsumer\GtfsConsumer.csproj", "{C61A6FCC-316A-4C4A-9339-94E9E9206C50}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GtfsConsumer.Entities", "GtfsConsumer.Entities\GtfsConsumer.Entities.csproj", "{B06844C1-85E3-4AB6-8E83-1735D6AE5268}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageProcessor", "MessageProcessor\MessageProcessor.csproj", "{0F10693F-15A9-476C-B6D5-68C4A1A0326C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AcTransitMap.Database", "AcTransitMap.Database\AcTransitMap.Database.csproj", "{649899A0-5B2F-473F-83DB-D149F6C7A916}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{B06844C1-85E3-4AB6-8E83-1735D6AE5268}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B06844C1-85E3-4AB6-8E83-1735D6AE5268}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B06844C1-85E3-4AB6-8E83-1735D6AE5268}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F10693F-15A9-476C-B6D5-68C4A1A0326C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F10693F-15A9-476C-B6D5-68C4A1A0326C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F10693F-15A9-476C-B6D5-68C4A1A0326C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F10693F-15A9-476C-B6D5-68C4A1A0326C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{649899A0-5B2F-473F-83DB-D149F6C7A916}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{649899A0-5B2F-473F-83DB-D149F6C7A916}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{649899A0-5B2F-473F-83DB-D149F6C7A916}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{649899A0-5B2F-473F-83DB-D149F6C7A916}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
