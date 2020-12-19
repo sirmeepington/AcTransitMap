@@ -1,6 +1,7 @@
 ﻿using AcTransitMap.Database;
 using GtfsConsumer.Entities.Interfaces;
 using MassTransit;
+using MassTransit.RabbitMqTransport;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using Serilog;
@@ -13,16 +14,7 @@ namespace MessageProcessor
     {
         public static async Task Main(string[] args)
         {
-            LoggerConfiguration config = new LoggerConfiguration()
-                .WriteTo.Console();
-            string seqApiKey = Environment.GetEnvironmentVariable("SEQ_API_KEY");
-            string seqUrl = Environment.GetEnvironmentVariable("SEQ_URL");
-            if (!string.IsNullOrEmpty(seqApiKey) && !string.IsNullOrEmpty(seqUrl))
-                config.WriteTo.Seq(seqUrl, apiKey: seqApiKey);
-
-            Log.Logger = config
-                .MinimumLevel.Information()
-                .CreateLogger();
+            InitLogging();
 
             IServiceCollection services = new ServiceCollection();
 
@@ -38,12 +30,26 @@ namespace MessageProcessor
             }
             catch (Exception ex)
             {
-                Log.Error(ex,"A(n) {ExceptionType} occured while starting the message bus: {ExceptionMessage}.", ex.GetType().Name, ex.Message);
+                Log.Error(ex, "A(n) {ExceptionType} occured while starting the message bus: {ExceptionMessage}.", ex.GetType().Name, ex.Message);
             }
             finally
             {
                 await provider.GetRequiredService<IBusControl>().StopAsync();
             }
+        }
+
+        private static void InitLogging()
+        {
+            LoggerConfiguration config = new LoggerConfiguration()
+                            .WriteTo.Console();
+            string seqApiKey = Environment.GetEnvironmentVariable("SEQ_API_KEY");
+            string seqUrl = Environment.GetEnvironmentVariable("SEQ_URL");
+            if (!string.IsNullOrEmpty(seqApiKey) && !string.IsNullOrEmpty(seqUrl))
+                config.WriteTo.Seq(seqUrl, apiKey: seqApiKey);
+
+            Log.Logger = config
+                .MinimumLevel.Information()
+                .CreateLogger();
         }
 
         private static void ConfigureServices(IServiceCollection services)
@@ -66,18 +72,21 @@ namespace MessageProcessor
             services.AddScoped<VehiclePositionConsumer>(); // Necessary to prevent MT DI faults.
             services.AddMassTransit(mt =>
             {
-                mt.UsingRabbitMq((context, rabbit) => {
-                    rabbit.Host("rabbitmq.service", "/", config =>
-                    {
-                        config.Username(rabbitUser);
-                        config.Password(rabbitPass);
-                    });
-                    rabbit.ReceiveEndpoint(endpoint =>
-                    {
-                        endpoint.Bind<IVehiclePosition>();
-                        endpoint.Consumer<VehiclePositionConsumer>(context);
-                    });
-                });
+                mt.UsingRabbitMq((context, rabbit) => ConfigureRabbit(context, rabbit, rabbitUser, rabbitPass));
+            });
+        }
+
+        private static void ConfigureRabbit(IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator rabbit, string rabbitUser, string rabbitPass)
+        {
+            rabbit.Host("rabbitmq.service", "/", config =>
+            {
+                config.Username(rabbitUser);
+                config.Password(rabbitPass);
+            });
+            rabbit.ReceiveEndpoint(endpoint =>
+            {
+                endpoint.Bind<IVehiclePosition>();
+                endpoint.Consumer<VehiclePositionConsumer>(context);
             });
         }
     }
