@@ -38,12 +38,15 @@ namespace GtfsConsumer
             }
             ConsumerService service = new ConsumerService(acTransit,consumer);
 
-            // Call every 30s
-            Timer timer = new Timer(new TimerCallback(service.Publish),null,0,30000);
-
             try
             {
+                // Call every 30s
+                Timer timer = new Timer(new TimerCallback(service.Publish), null, 0, 30000);
+
                 await Task.Delay(Timeout.Infinite);
+            } catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occured while publishing GTFS-RT feed: {ExceptionMessage}.", ex.Message);
             }
             finally
             {
