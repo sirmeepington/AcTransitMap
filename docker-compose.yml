@@ -11,14 +11,19 @@ services:
       dockerfile: AcTransitMap/Dockerfile
     networks:
       - app
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - SEQ_URL=http://seq.service:5341
     depends_on:
       - 'rabbitmq.service'
+      - 'seq.service'
 
   rabbitmq.service:
     image: masstransit/rabbitmq
     ports:
       - "15672:15672"
-      - "5672:5672"
     networks:
       - app
     healthcheck:
@@ -26,6 +31,17 @@ services:
       interval: 30s
       timeout: 20s
       retries: 10
+
+  seq.service:
+    image: datalust/seq:latest
+    ports:
+      - "81:80"
+    networks:
+      - app
+    volumes:
+      - /var/opt/seq/data:/data
+    environment:
+      - ACCEPT_EULA=Y
 
   gtfsconsumer:
     image: ${DOCKER_REGISTRY-}gtfsconsumer
@@ -37,5 +53,7 @@ services:
     environment:
       - RABBIT_USER=guest
       - RABBIT_PASS=guest
+      - SEQ_URL=http://seq.service:5341
     depends_on:
       - 'rabbitmq.service'
+      - 'seq.service'

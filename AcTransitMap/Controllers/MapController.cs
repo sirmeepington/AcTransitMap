@@ -9,15 +9,18 @@ namespace AcTransitMap.Controllers
 {
     public class MapController : Controller
     {
+        private readonly ILogger<MapController> _logger;
         private readonly IPositionService _positions;
 
-        public MapController(IPositionService positions)
+        public MapController(ILogger<MapController> logger, IPositionService positions)
         {
+            _logger = logger;
             _positions = positions;
         }
 
         public IActionResult Index()
         {
+            _logger.LogInformation("Serving GET {Url}.", "/Map/Index");
             IEnumerable<VehiclePosition> model = _positions.GetPositions();
             return View(model);
         } 

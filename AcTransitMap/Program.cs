@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace AcTransitMap
 {
@@ -13,6 +14,19 @@ namespace AcTransitMap
     {
         public static void Main(string[] args)
         {
+
+            LoggerConfiguration config = new LoggerConfiguration()
+                .WriteTo.Console();
+            string seqApiKey = Environment.GetEnvironmentVariable("SEQ_API_KEY");
+            string seqUrl = Environment.GetEnvironmentVariable("SEQ_URL");
+            if (!string.IsNullOrEmpty(seqApiKey) && !string.IsNullOrEmpty(seqUrl))
+                config.WriteTo.Seq(seqUrl, apiKey: seqApiKey);
+
+            Log.Logger = config
+                .MinimumLevel.Information()
+                .MinimumLevel.Override("Microsoft",Serilog.Events.LogEventLevel.Warning)
+                .CreateLogger();
+                
             CreateHostBuilder(args).Build().Run();
         }
 
@@ -21,7 +35,7 @@ namespace AcTransitMap
                 .ConfigureLogging(logging =>
                 {
                     logging.ClearProviders();
-                    logging.AddConsole();
+                    logging.AddSerilog();
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
