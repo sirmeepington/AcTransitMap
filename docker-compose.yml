@@ -13,6 +13,7 @@ services:
       - app
     depends_on:
       - 'rabbitmq.service'
+      - 'seq.service'
 
   rabbitmq.service:
     image: masstransit/rabbitmq
@@ -27,6 +28,16 @@ services:
       timeout: 20s
       retries: 10
 
+  seq.service:
+    image: datalust/seq:latest
+    ports:
+      - "5341:5341"
+      - "8001:80"
+    networks:
+      - app
+    environment:
+      - ACCEPT_EULA=Y
+
   gtfsconsumer:
     image: ${DOCKER_REGISTRY-}gtfsconsumer
     build:
@@ -39,3 +50,4 @@ services:
       - RABBIT_PASS=guest
     depends_on:
       - 'rabbitmq.service'
+      - 'seq.service'
