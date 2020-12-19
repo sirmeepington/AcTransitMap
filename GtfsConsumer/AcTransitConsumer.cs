@@ -73,29 +73,33 @@ namespace GtfsConsumer
             foreach (var msg in message.Entities)
             {
                 var trip = msg.TripUpdate;
-
-                ITripUpdate upd = new AcTransitTripUpdate()
-                {
-                    Delay = trip.Delay,
-                    Timestamp = DateTime.UnixEpoch.AddSeconds(trip.Timestamp),
-                    Trip = new AcTransitTripDescriptor()
-                    {
-                        TripId = trip.Trip.TripId,
-                        RouteId = trip.Trip.RouteId,
-                        SheduleType = trip.Trip.schedule_relationship.ToString(),
-                        DirectionId = trip.Trip.DirectionId
-                    },
-                    Vehicle = new AcTransitVehicleDescriptor()
-                    {
-                        Id = trip.Vehicle.Id,
-                        Label = trip.Vehicle.Label,
-                        LicensePlate = trip.Vehicle.LicensePlate
-                    },
-                    StopTimeUpdates = GetStopTimeUpdates(trip)
-                };
+                ITripUpdate upd = CreateTripUpdate(trip);
                 outVar.Add(upd);
             }
             return outVar;
+        }
+
+        private ITripUpdate CreateTripUpdate(TripUpdate trip)
+        {
+            return new AcTransitTripUpdate()
+            {
+                Delay = trip.Delay,
+                Timestamp = DateTime.UnixEpoch.AddSeconds(trip.Timestamp),
+                Trip = new AcTransitTripDescriptor()
+                {
+                    TripId = trip.Trip.TripId,
+                    RouteId = trip.Trip.RouteId,
+                    SheduleType = trip.Trip.schedule_relationship.ToString(),
+                    DirectionId = trip.Trip.DirectionId
+                },
+                Vehicle = new AcTransitVehicleDescriptor()
+                {
+                    Id = trip.Vehicle.Id,
+                    Label = trip.Vehicle.Label,
+                    LicensePlate = trip.Vehicle.LicensePlate
+                },
+                StopTimeUpdates = GetStopTimeUpdates(trip)
+            };
         }
 
         private IEnumerable<IStopTimeUpdate> GetStopTimeUpdates(TripUpdate trip)

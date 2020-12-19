@@ -8,6 +8,7 @@ using AcTransitMap.Services;
 using GreenPipes;
 using GtfsConsumer.Entities.Interfaces;
 using MassTransit;
+using MassTransit.RabbitMqTransport;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -38,23 +39,8 @@ namespace AcTransitMap
 
             services.AddMassTransit(cfg =>
             {
-                cfg.UsingRabbitMq((context, rabbit) =>
-                {
-                    //TODO: Make host, user and pass env vars.
-                    rabbit.Host("rabbitmq.service", "/", rabbitCfg =>
-                    {
-                        rabbitCfg.Username(rabbitUser);
-                        rabbitCfg.Password(rabbitPass);
-                    });
-
-                    rabbit.ReceiveEndpoint(endpoint =>
-                    {
-                        endpoint.Bind<IUpdatedVehiclePosition>();
-                        endpoint.Consumer<VehiclePositionConsumer>(context);
-                    });
-                });
+                cfg.UsingRabbitMq((context, rabbit) => ConfigureRabbit(context, rabbit, rabbitUser, rabbitPass));
             });
-
             services.AddMassTransitHostedService();
 
             string mongoUrl = Environment.GetEnvironmentVariable("MONGO_CONNSTR");
@@ -62,8 +48,22 @@ namespace AcTransitMap
             string mongoColl = Environment.GetEnvironmentVariable("MONGO_COLLECTION");
 
             services.AddSingleton<IDbConnector<UpdatedVehiclePosition, string>, MongoDbConnector>(x => new MongoDbConnector(mongoUrl,mongoDb,mongoColl));
-
             services.AddSingleton<IPositionService, PositionService>();
+        }
+
+        private static void ConfigureRabbit(IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator rabbit, string rabbitUser, string rabbitPass)
+        {
+            rabbit.Host("rabbitmq.service", "/", rabbitCfg =>
+            {
+                rabbitCfg.Username(rabbitUser);
+                rabbitCfg.Password(rabbitPass);
+            });
+
+            rabbit.ReceiveEndpoint(endpoint =>
+            {
+                endpoint.Bind<IUpdatedVehiclePosition>();
+                endpoint.Consumer<VehiclePositionConsumer>(context);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
