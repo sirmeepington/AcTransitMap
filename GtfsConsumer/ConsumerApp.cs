@@ -19,23 +19,13 @@ namespace GtfsConsumer
         static async Task Main(string[] args)
         {
             // Logging
-            LoggerConfiguration config = new LoggerConfiguration()
-                .WriteTo.Console();
-            string seqApiKey = Environment.GetEnvironmentVariable("SEQ_API_KEY");
-            string seqUrl = Environment.GetEnvironmentVariable("SEQ_URL");
-            if (!string.IsNullOrEmpty(seqApiKey) && !string.IsNullOrEmpty(seqUrl))
-                config.WriteTo.Seq(seqUrl, apiKey: seqApiKey);
-
-            Log.Logger = config
-                .MinimumLevel.Information()
-                .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
-                .CreateLogger();
+            InitLogging();
 
             string apiKey = Environment.GetEnvironmentVariable("ACTRANSIT_KEY");
             string user = Environment.GetEnvironmentVariable("RABBIT_USER");
             string pass = Environment.GetEnvironmentVariable("RABBIT_PASS");
 
-            IConsumerBus consumer = new ConsumerBus("rabbitmq.service",user,pass);
+            IConsumerBus consumer = new ConsumerBus("rabbitmq.service", user, pass);
             await consumer.Start();
 
             ITransitConsumer acTransit = null;
@@ -52,7 +42,7 @@ namespace GtfsConsumer
             List<IVehiclePosition> vehicles;
             try
             {
-                vehicles = (List<IVehiclePosition>) await acTransit.GetVehiclePositions();
+                vehicles = (List<IVehiclePosition>)await acTransit.GetVehiclePositions();
                 Log.Information("Retrieved {VehicleAmount} vehicles from the GTFS-RT feed.", vehicles.Count);
             }
             catch (Exception ex)
@@ -61,7 +51,7 @@ namespace GtfsConsumer
                 return;
             }
 
-            Log.Information("Publishing {VehicleAmount} vehicles to the message queue.",vehicles.Count);
+            Log.Information("Publishing {VehicleAmount} vehicles to the message queue.", vehicles.Count);
             foreach (IVehiclePosition pos in vehicles)
             {
                 await consumer.Publish(pos);
@@ -75,6 +65,21 @@ namespace GtfsConsumer
             {
                 await consumer.Stop();
             }
+        }
+
+        private static void InitLogging()
+        {
+            LoggerConfiguration config = new LoggerConfiguration()
+                            .WriteTo.Console();
+            string seqApiKey = Environment.GetEnvironmentVariable("SEQ_API_KEY");
+            string seqUrl = Environment.GetEnvironmentVariable("SEQ_URL");
+            if (!string.IsNullOrEmpty(seqApiKey) && !string.IsNullOrEmpty(seqUrl))
+                config.WriteTo.Seq(seqUrl, apiKey: seqApiKey);
+
+            Log.Logger = config
+                .MinimumLevel.Information()
+                .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+                .CreateLogger();
         }
     }
 }

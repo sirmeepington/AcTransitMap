@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace GtfsConsumer.Entities.Interfaces
 {
-    public interface IVehiclePosition
+    public interface IUpdatedVehiclePosition
     {
 
         public DateTime Timestamp { get; set; }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AcTransitMap.Consumers
 {
-    public class VehiclePositionConsumer : IConsumer<IVehiclePosition>
+    public class VehiclePositionConsumer : IConsumer<IUpdatedVehiclePosition>
     {
         private readonly ILogger<VehiclePositionConsumer> _logger;
         private readonly IPositionService _positionService;
@@ -17,7 +17,7 @@ namespace AcTransitMap.Consumers
             _positionService = positionService;
         }
 
-        public Task Consume(ConsumeContext<IVehiclePosition> context)
+        public Task Consume(ConsumeContext<IUpdatedVehiclePosition> context)
         {
             _positionService.UpdateVehiclePosition(context.Message);
             return Task.CompletedTask;

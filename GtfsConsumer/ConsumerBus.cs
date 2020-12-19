@@ -20,10 +20,6 @@ namespace GtfsConsumer
                     rabbit.Username(rabbitUser);
                     rabbit.Password(rabbitPass);
                 });
-                bus.Publish<IVehiclePositionUpdate>(x =>
-                {
-                    x.ExchangeType = "fanout";
-                });
             });
         }
 
