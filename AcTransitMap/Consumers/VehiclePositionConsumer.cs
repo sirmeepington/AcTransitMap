@@ -17,10 +17,9 @@ namespace AcTransitMap.Consumers
             _positionService = positionService;
         }
 
-        public Task Consume(ConsumeContext<IUpdatedVehiclePosition> context)
+        public async Task Consume(ConsumeContext<IUpdatedVehiclePosition> context)
         {
-            _positionService.UpdateVehiclePosition(context.Message);
-            return Task.CompletedTask;
+            await _positionService.UpdateVehiclePosition(context.Message);
         }
     }
 }

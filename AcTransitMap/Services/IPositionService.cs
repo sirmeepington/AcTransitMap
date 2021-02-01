@@ -7,7 +7,7 @@ namespace AcTransitMap.Services
 {
     public interface IPositionService
     {
-        void UpdateVehiclePosition(IUpdatedVehiclePosition pos);
+        Task UpdateVehiclePosition(IUpdatedVehiclePosition pos);
         IEnumerable<VehiclePosition> GetPositions();
         Task GatherInitialValuesAsync();
     }

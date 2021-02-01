@@ -1,19 +1,8 @@
-﻿using AcTransitMap.Models;
-using AcTransitMap.Services;
-using Microsoft.AspNetCore.SignalR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.SignalR;
 
 namespace AcTransitMap.Hubs
 {
-    public class MapPositionHub : Hub
+    public class MapPositionHub : Hub<IPositionClient>
     {
-
-        public async Task UpdateLocations(IEnumerable<VehiclePosition> newLocations)
-        {
-            await Clients.All.SendAsync("UpdateLocations", newLocations);
-        }
     }
 }

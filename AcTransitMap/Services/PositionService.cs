@@ -1,6 +1,8 @@
 ﻿using AcTransitMap.Database;
+using AcTransitMap.Hubs;
 using AcTransitMap.Models;
 using GtfsConsumer.Entities.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -18,12 +20,14 @@ namespace AcTransitMap.Services
         private readonly ILogger<PositionService> _logger;
         private readonly IDbConnector<UpdatedVehiclePosition, string> _database;
         private bool gathered = false;
+        private readonly IHubContext<MapPositionHub,IPositionClient> _posHub;
 
-        public PositionService(ILogger<PositionService> logger, IDbConnector<UpdatedVehiclePosition, string> database)
+        public PositionService(ILogger<PositionService> logger, IDbConnector<UpdatedVehiclePosition, string> database, IHubContext<MapPositionHub,IPositionClient> posHub)
         {
             _positions = new ConcurrentDictionary<string, VehiclePosition>();
             _logger = logger;
             _database = database;
+            _posHub = posHub;
         }
 
         public async Task GatherInitialValuesAsync()
@@ -54,7 +58,7 @@ namespace AcTransitMap.Services
             return _positions.Values.ToList();
         }
 
-        public void UpdateVehiclePosition(IUpdatedVehiclePosition pos)
+        public async Task UpdateVehiclePosition(IUpdatedVehiclePosition pos)
         {
             if (!_positions.TryGetValue(pos.VehicleId, out VehiclePosition vehiclePos))
             {
@@ -71,6 +75,8 @@ namespace AcTransitMap.Services
 
             _positions[pos.VehicleId] = vehiclePos;
             _logger.LogInformation("Updated postition for {VehicleId}: {Longitude}, {Latitude} at {DateTime}", pos.VehicleId, pos.Longitude, pos.Latitude,DateTime.UtcNow.ToString());
+
+            await _posHub.Clients.All.UpdateLocation(vehiclePos);
         }
 
     }
