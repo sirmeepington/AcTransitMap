@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace GtfsConsumer
 {
+    /// <summary>
+    /// Consumer bus implementation.
+    /// </summary>
     public class ConsumerBus : IConsumerBus
     {
         private readonly IBusControl _bus;
@@ -23,16 +26,27 @@ namespace GtfsConsumer
             });
         }
 
+        /// <summary>
+        /// Starts the bus.
+        /// </summary>
         public async Task Start()
         {
             await _bus.StartAsync();
         }
 
+        /// <summary>
+        /// Stops the bus.
+        /// </summary>
         public async Task Stop()
         {
             await _bus.StopAsync();
         }
 
+        /// <summary>
+        /// Publishes a message to the bus.
+        /// </summary>
+        /// <typeparam name="T">The type of the message.</typeparam>
+        /// <param name="obj">The message object.</param>
         public async Task Publish<T>(T obj)
         {
             await _bus.Publish(obj);

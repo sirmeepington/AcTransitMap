@@ -1,9 +1,6 @@
-﻿using GtfsConsumer.Entities;
-using GtfsConsumer.Entities.Interfaces;
-using GtfsConsumer.Services;
+﻿using GtfsConsumer.Services;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,25 +21,12 @@ namespace GtfsConsumer
             InitLogging();
 
             IConsumerBus consumer = await CreateAndStartBus();
-
-            string apiKey = Environment.GetEnvironmentVariable("ACTRANSIT_KEY");
-            ITransitConsumer acTransit = null;
-            try
-            {
-                acTransit = new AcTransitConsumer(apiKey);
-                Log.Information("Created ACTransit GTFS-RT consumer.");
-            }
-            catch (Exception ex)
-            {
-                Log.Error("A(n) {ExceptionType} occured while accessing the ACTransit GTFS-RT endpoint: {ExceptionMessage}.", ex.GetType().Name, ex.Message);
-            }
-            ConsumerService service = new ConsumerService(acTransit,consumer);
+            IConsumerService service = CreateService(consumer);
 
             try
             {
                 // Call every 30s
                 Timer timer = new Timer(new TimerCallback(service.Publish), null, 0, 30000);
-
                 await Task.Delay(Timeout.Infinite);
             } catch (Exception ex)
             {
@@ -55,9 +39,36 @@ namespace GtfsConsumer
             }
         }
 
+        /// <summary>
+        /// Creates a <see cref="ConsumerService"/> from the given
+        /// <see cref="IConsumerBus"/>.
+        /// </summary>
+        /// <param name="consumer">The consumer bus to create from.</param>
+        private static IConsumerService CreateService(IConsumerBus consumer)
+        {
+            string apiKey = Environment.GetEnvironmentVariable("ACTRANSIT_KEY");
+            ITransitConsumer acTransit = null;
+            try
+            {
+                acTransit = new AcTransitConsumer(apiKey);
+                Log.Information("Created ACTransit GTFS-RT consumer.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error("A(n) {ExceptionType} occured while accessing the ACTransit GTFS-RT endpoint: {ExceptionMessage}.", ex.GetType().Name, ex.Message);
+            }
+            IConsumerService service = new ConsumerService(acTransit, consumer);
+            return service;
+        }
+
+        /// <summary>
+        /// Creates and starts a <see cref="IConsumerBus"/> for 
+        /// publishing messages.
+        /// </summary>
+        /// <returns>A new <see cref="IConsumerBus"/> for publishing
+        /// messages down the system.</returns>
         private static async Task<IConsumerBus> CreateAndStartBus()
         {
-
             string rabbitUser = Environment.GetEnvironmentVariable("RABBIT_USER");
             string rabbitPass = Environment.GetEnvironmentVariable("RABBIT_PASS");
             IConsumerBus consumer = new ConsumerBus("rabbitmq.service", rabbitUser, rabbitPass);
@@ -65,6 +76,9 @@ namespace GtfsConsumer
             return consumer;
         }
 
+        /// <summary>
+        /// Initializes logging using Serilog and Seq.
+        /// </summary>
         private static void InitLogging()
         {
             LoggerConfiguration config = new LoggerConfiguration()

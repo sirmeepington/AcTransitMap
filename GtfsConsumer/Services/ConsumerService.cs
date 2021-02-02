@@ -7,7 +7,10 @@ using System.Threading.Tasks;
 
 namespace GtfsConsumer.Services
 {
-    public class ConsumerService
+    /// <summary>
+    /// Service to manaage the consuming of GTFS-RT data.
+    /// </summary>
+    public class ConsumerService : IConsumerService
     {
         private readonly IConsumerBus _bus;
         private readonly ITransitConsumer _consumer;
@@ -18,6 +21,11 @@ namespace GtfsConsumer.Services
             _bus = bus;
         }
 
+        /// <summary>
+        /// Timer callback for reading the vehicle positions from the
+        /// GTFS feed and publishes it to the bus.
+        /// </summary>
+        /// <param name="state"></param>
         public async void Publish(object state)
         {
             List<IVehiclePosition> vehicles;
