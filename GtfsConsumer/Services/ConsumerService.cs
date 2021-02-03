@@ -2,6 +2,7 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,11 +30,12 @@ namespace GtfsConsumer.Services
         public async void Publish(object state)
         {
             Log.Information("Gathering GTFS-RT vehicle information");
-            List<IVehiclePosition> vehicles;
+            IEnumerable<IVehiclePosition> vehicles;
             try
             {
-                vehicles = (List<IVehiclePosition>)await _consumer.GetVehiclePositions();
-                Log.Information("Retrieved {VehicleAmount} vehicles from the GTFS-RT feed.", vehicles.Count);
+                vehicles = await _consumer.GetVehiclePositions();
+                // Count casts to ICollection<T> for performance (will work as intended).
+                Log.Information("Retrieved {VehicleAmount} vehicles from the GTFS-RT feed.", vehicles.Count());
             }
             catch (Exception ex)
             {
