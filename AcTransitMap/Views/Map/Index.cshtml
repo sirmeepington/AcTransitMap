@@ -1,7 +1,5 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@model IEnumerable<AcTransitMap.Models.VehiclePosition>
+﻿@model IEnumerable<AcTransitMap.Models.VehiclePosition>
+
 <style>
     #map-canvas {
         height: 500px;
@@ -12,9 +10,10 @@
 
 @section scripts {
     <script src="~/lib/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/map.js"></script>
     <script defer src="https://maps.googleapis.com/maps/api/js?callback=initMap"></script>
     <script src="~/js/map.js"></script>
     <script>
-        var locations = @Html.Raw(Json.Serialize(Model))
+        var locations = @Html.Raw(Json.Serialize(Model));
     </script>
 }

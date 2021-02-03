@@ -33,6 +33,8 @@ namespace AcTransitMap
         {
             services.AddControllersWithViews();
 
+            services.AddHostedService<PositionUpdaterService>();
+
             services.AddScoped<VehiclePositionConsumer>();
 
             string rabbitUser = Environment.GetEnvironmentVariable("RABBIT_USER");

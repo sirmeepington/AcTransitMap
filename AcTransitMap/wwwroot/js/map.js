@@ -31,13 +31,11 @@ function createMarker(location) {
     })(marker)
 
     markers[location.vehicleId] = marker;
-//    console.log("Added marker for " + location.vehicleId+" currently "+markers.length+" markers exist.");
 }
 
 // Updates a markers position or creates one if it doesn't
 // exist for the given Vehicle Location
 function updateMarker(location) {
-//    console.log("Updating location: " + JSON.stringify(location));
     var marker = markers[location.vehicleId];
     if (marker) {
         marker.setPosition(new google.maps.LatLng(location.latitude, location.longitude));
@@ -49,7 +47,7 @@ function updateMarker(location) {
 function initMap() {
     // map options
     var options = {
-        zoom: 5,
+        zoom: 10,
         center: new google.maps.LatLng(37.811321571951616, -122.24355892440079),
         mapTypeId: google.maps.MapTypeId.TERRAIN,
         mapTypeControl: false
@@ -71,13 +69,10 @@ var connection = new signalR.HubConnectionBuilder()
 
 connection.start().then(function () {
     console.log("SignalR connection established.");
-
-    initMap();
 }).catch(function (err) {
     return console.error(err.toString())
 })
 
 connection.on("UpdateLocation", function (loc) {
-    console.log("Received update for " + loc.vehicleId);
     updateMarker(loc);
 });
