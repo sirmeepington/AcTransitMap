@@ -10,7 +10,7 @@ namespace GtfsConsumer.Services
     /// <summary>
     /// Service to manaage the consuming of GTFS-RT data.
     /// </summary>
-    public class ConsumerService : IConsumerService
+    public class ConsumerService
     {
         private readonly IConsumerBus _bus;
         private readonly ITransitConsumer _consumer;
@@ -28,6 +28,7 @@ namespace GtfsConsumer.Services
         /// <param name="state"></param>
         public async void Publish(object state)
         {
+            Log.Information("Gathering GTFS-RT vehicle information");
             List<IVehiclePosition> vehicles;
             try
             {
@@ -39,6 +40,7 @@ namespace GtfsConsumer.Services
                 Log.Error("A(n) {ExceptionType} occured while retrieving ACTransit vehicle positions: {ExceptionMessage}.", ex.GetType().Name, ex.Message);
                 return;
             }
+            Log.Information("Publishing gathered GTFS-RT vehicle information");
             foreach (IVehiclePosition pos in vehicles)
             {
                 await _bus.Publish(pos);

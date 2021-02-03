@@ -21,12 +21,13 @@ namespace GtfsConsumer
             InitLogging();
 
             IConsumerBus consumer = await CreateAndStartBus();
-            IConsumerService service = CreateService(consumer);
+            ConsumerService service = CreateService(consumer);
 
             try
             {
                 // Call every 30s
-                Timer timer = new Timer(new TimerCallback(service.Publish), null, 0, 30000);
+                Log.Information("Beginning GTFS-RT gather timer.");
+                Timer timer = new Timer(new TimerCallback(service.Publish), null, 0, 10000);
                 await Task.Delay(Timeout.Infinite);
             } catch (Exception ex)
             {
@@ -44,7 +45,7 @@ namespace GtfsConsumer
         /// <see cref="IConsumerBus"/>.
         /// </summary>
         /// <param name="consumer">The consumer bus to create from.</param>
-        private static IConsumerService CreateService(IConsumerBus consumer)
+        private static ConsumerService CreateService(IConsumerBus consumer)
         {
             string apiKey = Environment.GetEnvironmentVariable("ACTRANSIT_KEY");
             ITransitConsumer acTransit = null;
@@ -57,7 +58,7 @@ namespace GtfsConsumer
             {
                 Log.Error("A(n) {ExceptionType} occured while accessing the ACTransit GTFS-RT endpoint: {ExceptionMessage}.", ex.GetType().Name, ex.Message);
             }
-            IConsumerService service = new ConsumerService(acTransit, consumer);
+            ConsumerService service = new ConsumerService(acTransit, consumer);
             return service;
         }
 
