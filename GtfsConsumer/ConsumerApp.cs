@@ -1,8 +1,7 @@
-﻿using GtfsConsumer.Entities;
-using GtfsConsumer.Entities.Interfaces;
+﻿using GtfsConsumer.Services;
 using Serilog;
 using System;
-using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GtfsConsumer
@@ -21,13 +20,51 @@ namespace GtfsConsumer
             // Logging
             InitLogging();
 
+            IConsumerBus consumer = await CreateAndStartBus();
+            ConsumerService service = CreateService(consumer);
+
+            try
+            {
+                // Call every 30s
+                Log.Information("Beginning GTFS-RT gather timer.");
+                Timer timer = new Timer(new TimerCallback(service.Publish), null, 0, GetDelay());
+                await Task.Delay(Timeout.Infinite);
+            } catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occured while publishing GTFS-RT feed: {ExceptionMessage}.", ex.Message);
+            }
+            finally
+            {
+                Log.Information("Closing the Gtfs Consumer");
+                await consumer.Stop();
+            }
+        }
+
+        /// <summary>
+        /// Gets a delay in seconds from the "FETCH_DELAY" environment variable.
+        /// Multiplies it by 1000 to make it into milliseconds and returns in.
+        /// </summary>
+        /// <returns>The second delay in milliseconds if valid; or 10 seconds in
+        /// milliseconds if invalid.</returns>
+        private static int GetDelay()
+        {
+            string delayEnvVar = Environment.GetEnvironmentVariable("FETCH_DELAY");
+            if (float.TryParse(delayEnvVar, out float delayFloat))
+            {
+                return (int)(delayFloat * 1000); // In seconds.
+            }
+            Log.Warning("Invalid FETCH_DELAY ({InvalidDelay}) given. Expected numeric value.");
+            return 10000;
+        }
+
+        /// <summary>
+        /// Creates a <see cref="ConsumerService"/> from the given
+        /// <see cref="IConsumerBus"/>.
+        /// </summary>
+        /// <param name="consumer">The consumer bus to create from.</param>
+        private static ConsumerService CreateService(IConsumerBus consumer)
+        {
             string apiKey = Environment.GetEnvironmentVariable("ACTRANSIT_KEY");
-            string user = Environment.GetEnvironmentVariable("RABBIT_USER");
-            string pass = Environment.GetEnvironmentVariable("RABBIT_PASS");
-
-            IConsumerBus consumer = new ConsumerBus("rabbitmq.service", user, pass);
-            await consumer.Start();
-
             ITransitConsumer acTransit = null;
             try
             {
@@ -38,35 +75,28 @@ namespace GtfsConsumer
             {
                 Log.Error("A(n) {ExceptionType} occured while accessing the ACTransit GTFS-RT endpoint: {ExceptionMessage}.", ex.GetType().Name, ex.Message);
             }
-
-            List<IVehiclePosition> vehicles;
-            try
-            {
-                vehicles = (List<IVehiclePosition>)await acTransit.GetVehiclePositions();
-                Log.Information("Retrieved {VehicleAmount} vehicles from the GTFS-RT feed.", vehicles.Count);
-            }
-            catch (Exception ex)
-            {
-                Log.Error("A(n) {ExceptionType} occured while retrieving ACTransit vehicle positions: {ExceptionMessage}.", ex.GetType().Name, ex.Message);
-                return;
-            }
-
-            Log.Information("Publishing {VehicleAmount} vehicles to the message queue.", vehicles.Count);
-            foreach (IVehiclePosition pos in vehicles)
-            {
-                await consumer.Publish(pos);
-            }
-
-            try
-            {
-                Console.WriteLine("Done.");
-            }
-            finally
-            {
-                await consumer.Stop();
-            }
+            ConsumerService service = new ConsumerService(acTransit, consumer);
+            return service;
         }
 
+        /// <summary>
+        /// Creates and starts a <see cref="IConsumerBus"/> for 
+        /// publishing messages.
+        /// </summary>
+        /// <returns>A new <see cref="IConsumerBus"/> for publishing
+        /// messages down the system.</returns>
+        private static async Task<IConsumerBus> CreateAndStartBus()
+        {
+            string rabbitUser = Environment.GetEnvironmentVariable("RABBIT_USER");
+            string rabbitPass = Environment.GetEnvironmentVariable("RABBIT_PASS");
+            IConsumerBus consumer = new ConsumerBus("rabbitmq.service", rabbitUser, rabbitPass);
+            await consumer.Start();
+            return consumer;
+        }
+
+        /// <summary>
+        /// Initializes logging using Serilog and Seq.
+        /// </summary>
         private static void InitLogging()
         {
             LoggerConfiguration config = new LoggerConfiguration()

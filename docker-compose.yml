@@ -60,6 +60,7 @@ services:
       - RABBIT_USER=${RABBIT_USER}
       - SEQ_URL=${SEQ_URL}
       - ACTRANSIT_KEY=${ACTRANSIT_KEY}
+      - FETCH_DELAY=10
     depends_on:
       - 'rabbitmq.service'
       - 'seq.service'

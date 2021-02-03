@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using Serilog;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MessageProcessor
@@ -26,7 +27,7 @@ namespace MessageProcessor
             try
             {
                 await provider.GetRequiredService<IBusControl>().StartAsync();
-                Console.Read();
+                await Task.Delay(Timeout.Infinite);
             }
             catch (Exception ex)
             {
@@ -35,6 +36,7 @@ namespace MessageProcessor
             finally
             {
                 await provider.GetRequiredService<IBusControl>().StopAsync();
+                Log.Information("Closing MessageProcessor");
             }
         }
 
