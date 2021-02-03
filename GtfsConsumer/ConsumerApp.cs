@@ -27,7 +27,7 @@ namespace GtfsConsumer
             {
                 // Call every 30s
                 Log.Information("Beginning GTFS-RT gather timer.");
-                Timer timer = new Timer(new TimerCallback(service.Publish), null, 0, 10000);
+                Timer timer = new Timer(new TimerCallback(service.Publish), null, 0, GetDelay());
                 await Task.Delay(Timeout.Infinite);
             } catch (Exception ex)
             {
@@ -38,6 +38,23 @@ namespace GtfsConsumer
                 Log.Information("Closing the Gtfs Consumer");
                 await consumer.Stop();
             }
+        }
+
+        /// <summary>
+        /// Gets a delay in seconds from the "FETCH_DELAY" environment variable.
+        /// Multiplies it by 1000 to make it into milliseconds and returns in.
+        /// </summary>
+        /// <returns>The second delay in milliseconds if valid; or 10 seconds in
+        /// milliseconds if invalid.</returns>
+        private static int GetDelay()
+        {
+            string delayEnvVar = Environment.GetEnvironmentVariable("FETCH_DELAY");
+            if (float.TryParse(delayEnvVar, out float delayFloat))
+            {
+                return (int)(delayFloat * 1000); // In seconds.
+            }
+            Log.Warning("Invalid FETCH_DELAY ({InvalidDelay}) given. Expected numeric value.");
+            return 10000;
         }
 
         /// <summary>
