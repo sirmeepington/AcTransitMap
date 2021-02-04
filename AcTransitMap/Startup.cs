@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AcTransitMap.Consumers;
 using AcTransitMap.Database;
+using AcTransitMap.Hubs;
 using AcTransitMap.Services;
 using GreenPipes;
 using GtfsConsumer.Entities.Interfaces;
@@ -32,6 +33,8 @@ namespace AcTransitMap
         {
             services.AddControllersWithViews();
 
+            services.AddHostedService<PositionUpdaterService>();
+
             services.AddScoped<VehiclePositionConsumer>();
 
             string rabbitUser = Environment.GetEnvironmentVariable("RABBIT_USER");
@@ -49,6 +52,8 @@ namespace AcTransitMap
 
             services.AddSingleton<IDbConnector<UpdatedVehiclePosition, string>, MongoDbConnector>(x => new MongoDbConnector(mongoUrl,mongoDb,mongoColl));
             services.AddSingleton<IPositionService, PositionService>();
+
+            services.AddSignalR();
         }
 
         private static void ConfigureRabbit(IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator rabbit, string rabbitUser, string rabbitPass)
@@ -91,6 +96,7 @@ namespace AcTransitMap
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapHub<MapPositionHub>("mapHub");
             });
         }
     }

@@ -1,6 +1,8 @@
 ﻿using AcTransitMap.Database;
+using AcTransitMap.Hubs;
 using AcTransitMap.Models;
 using GtfsConsumer.Entities.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -12,20 +14,25 @@ using System.Threading.Tasks;
 
 namespace AcTransitMap.Services
 {
+    /// <inheritdoc cref="IPositionService"/>
     public class PositionService : IPositionService
     {
         private readonly ConcurrentDictionary<string, VehiclePosition> _positions;
         private readonly ILogger<PositionService> _logger;
         private readonly IDbConnector<UpdatedVehiclePosition, string> _database;
+        private readonly IHubContext<MapPositionHub,IPositionClient> _posHub;
+
         private bool gathered = false;
 
-        public PositionService(ILogger<PositionService> logger, IDbConnector<UpdatedVehiclePosition, string> database)
+        public PositionService(ILogger<PositionService> logger, IDbConnector<UpdatedVehiclePosition, string> database, IHubContext<MapPositionHub,IPositionClient> posHub)
         {
             _positions = new ConcurrentDictionary<string, VehiclePosition>();
             _logger = logger;
             _database = database;
+            _posHub = posHub;
         }
 
+        /// <inheritdoc/>
         public async Task GatherInitialValuesAsync()
         {
             if (gathered)
@@ -49,12 +56,14 @@ namespace AcTransitMap.Services
             gathered = true;
         }
 
+        /// <inheritdoc/>
         public IEnumerable<VehiclePosition> GetPositions()
         {
             return _positions.Values.ToList();
         }
 
-        public void UpdateVehiclePosition(IUpdatedVehiclePosition pos)
+        /// <inheritdoc/>
+        public async Task UpdateVehiclePosition(IUpdatedVehiclePosition pos)
         {
             if (!_positions.TryGetValue(pos.VehicleId, out VehiclePosition vehiclePos))
             {
@@ -71,6 +80,8 @@ namespace AcTransitMap.Services
 
             _positions[pos.VehicleId] = vehiclePos;
             _logger.LogInformation("Updated postition for {VehicleId}: {Longitude}, {Latitude} at {DateTime}", pos.VehicleId, pos.Longitude, pos.Latitude,DateTime.UtcNow.ToString());
+
+            await _posHub.Clients.All.UpdateLocation(vehiclePos);
         }
 
     }

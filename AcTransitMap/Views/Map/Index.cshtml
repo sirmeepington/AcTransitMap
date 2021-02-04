@@ -1,55 +1,29 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@model IEnumerable<AcTransitMap.Models.VehiclePosition>
+﻿@model IEnumerable<AcTransitMap.Models.VehiclePosition>
+
 <style>
+    .map-container {
+        display:flex;
+        flex-direction:column;
+        min-height:100vh;
+    }
+
     #map-canvas {
-        height: 500px;
+        flex-grow:1;
     }
 </style>
 
-<div id="map-canvas"></div>
+    <div class="map-container">
+
+        <div id="map-canvas"></div>
+
+    </div>
 
 @section scripts {
+    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/map.js"></script>
     <script defer src="https://maps.googleapis.com/maps/api/js?callback=initMap"></script>
+    <script src="~/js/map.js"></script>
     <script>
-    var locations = @Html.Raw(Json.Serialize(Model))
-    function initMap() {
-        // execute
-        (function () {
-            // map options
-            var options = {
-                zoom: 10,
-                center: new google.maps.LatLng(37.740723782462254, -122.15334997296829),
-                mapTypeId: google.maps.MapTypeId.TERRAIN,
-                mapTypeControl: false
-            };
-
-            // init map
-            var map = new google.maps.Map(document.getElementById('map-canvas'), options);
-
-            for (var i = 0; i < locations.length; i++) {
-                // init markers
-                var marker = new google.maps.Marker({
-                    position: new google.maps.LatLng(locations[i].latitude, locations[i].longitude),
-                    map: map,
-                    title: "Vehicle "+locations[i].vehicleId
-                });
-
-                // process multiple info windows
-                (function (marker, i) {
-                    // add click event
-                    google.maps.event.addListener(marker, 'click', function () {
-                        infowindow = new google.maps.InfoWindow({
-                            content: "Bus #"+locations[i].vehicleId + " @@ " + locations[i].lastUpdated + " UTC"
-                        });
-                        infowindow.open(map, marker);
-                    });
-                })(marker, i);
-            }
-        })();
-    }
-
+        var locations = @Html.Raw(Json.Serialize(Model));
     </script>
-
 }
