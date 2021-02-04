@@ -47,7 +47,7 @@ function updateMarker(location) {
 function initMap() {
     // map options
     var options = {
-        zoom: 10,
+        zoom: 11,
         center: new google.maps.LatLng(37.811321571951616, -122.24355892440079),
         mapTypeId: google.maps.MapTypeId.TERRAIN,
         mapTypeControl: false

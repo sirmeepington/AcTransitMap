@@ -1,12 +1,22 @@
 ﻿@model IEnumerable<AcTransitMap.Models.VehiclePosition>
 
 <style>
+    .map-container {
+        display:flex;
+        flex-direction:column;
+        min-height:100vh;
+    }
+
     #map-canvas {
-        height: 500px;
+        flex-grow:1;
     }
 </style>
 
-<div id="map-canvas"></div>
+    <div class="map-container">
+
+        <div id="map-canvas"></div>
+
+    </div>
 
 @section scripts {
     <script src="~/lib/signalr/dist/browser/signalr.js"></script>
