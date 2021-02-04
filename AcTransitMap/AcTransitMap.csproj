@@ -24,4 +24,8 @@
     <ProjectReference Include="..\AcTransitMap.Shared.Entities\AcTransitMap.Shared.Entities.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\Home\" />
+  </ItemGroup>
+
 </Project>

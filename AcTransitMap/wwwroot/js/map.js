@@ -16,9 +16,16 @@ function createMarker(location) {
         return;
     }
 
+    var icon = {
+        url: "https://maps.google.com/mapfiles/kml/shapes/bus.png",
+        scaledSize: new google.maps.Size(32,32),
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(0, 0),
+    };
     var marker = new google.maps.Marker({
         position: new google.maps.LatLng(location.latitude, location.longitude),
         map: map,
+        icon: icon,
     });
 
     (function (marker) {

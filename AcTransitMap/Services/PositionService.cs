@@ -79,7 +79,7 @@ namespace AcTransitMap.Services
             vehiclePos.LastUpdated = DateTime.UtcNow.ToString("G");
 
             _positions[pos.VehicleId] = vehiclePos;
-            _logger.LogInformation("Updated postition for {VehicleId}: {Longitude}, {Latitude} at {DateTime}", pos.VehicleId, pos.Longitude, pos.Latitude,DateTime.UtcNow.ToString());
+            _logger.LogDebug("Updated postition for {VehicleId}: {Longitude}, {Latitude} at {DateTime}", pos.VehicleId, pos.Longitude, pos.Latitude,DateTime.UtcNow.ToString());
 
             await _posHub.Clients.All.UpdateLocation(vehiclePos);
         }
