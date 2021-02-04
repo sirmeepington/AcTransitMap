@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GtfsConsumer.Entities\GtfsConsumer.Entities.csproj" />
+    <ProjectReference Include="..\AcTransitMap.Shared.Entities\AcTransitMap.Shared.Entities.csproj" />
   </ItemGroup>
 
 </Project>

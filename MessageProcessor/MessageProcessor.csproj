@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AcTransitMap.Database\AcTransitMap.Database.csproj" />
-    <ProjectReference Include="..\GtfsConsumer.Entities\GtfsConsumer.Entities.csproj" />
+    <ProjectReference Include="..\AcTransitMap.Shared.Entities\AcTransitMap.Shared.Entities.csproj" />
   </ItemGroup>
 
 </Project>

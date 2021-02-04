@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GtfsConsumer.Entities\GtfsConsumer.Entities.csproj" />
+    <ProjectReference Include="..\AcTransitMap.Shared.Entities\AcTransitMap.Shared.Entities.csproj" />
   </ItemGroup>
 
 </Project>
