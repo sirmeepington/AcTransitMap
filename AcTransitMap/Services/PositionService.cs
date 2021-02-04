@@ -14,13 +14,15 @@ using System.Threading.Tasks;
 
 namespace AcTransitMap.Services
 {
+    /// <inheritdoc cref="IPositionService"/>
     public class PositionService : IPositionService
     {
         private readonly ConcurrentDictionary<string, VehiclePosition> _positions;
         private readonly ILogger<PositionService> _logger;
         private readonly IDbConnector<UpdatedVehiclePosition, string> _database;
-        private bool gathered = false;
         private readonly IHubContext<MapPositionHub,IPositionClient> _posHub;
+
+        private bool gathered = false;
 
         public PositionService(ILogger<PositionService> logger, IDbConnector<UpdatedVehiclePosition, string> database, IHubContext<MapPositionHub,IPositionClient> posHub)
         {
@@ -30,6 +32,7 @@ namespace AcTransitMap.Services
             _posHub = posHub;
         }
 
+        /// <inheritdoc/>
         public async Task GatherInitialValuesAsync()
         {
             if (gathered)
@@ -53,11 +56,13 @@ namespace AcTransitMap.Services
             gathered = true;
         }
 
+        /// <inheritdoc/>
         public IEnumerable<VehiclePosition> GetPositions()
         {
             return _positions.Values.ToList();
         }
 
+        /// <inheritdoc/>
         public async Task UpdateVehiclePosition(IUpdatedVehiclePosition pos)
         {
             if (!_positions.TryGetValue(pos.VehicleId, out VehiclePosition vehiclePos))
