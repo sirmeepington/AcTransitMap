@@ -9,11 +9,11 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GtfsConsumer", "GtfsConsumer\GtfsConsumer.csproj", "{C61A6FCC-316A-4C4A-9339-94E9E9206C50}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GtfsConsumer.Entities", "GtfsConsumer.Entities\GtfsConsumer.Entities.csproj", "{B06844C1-85E3-4AB6-8E83-1735D6AE5268}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AcTransitMap.Shared.Entities", "AcTransitMap.Shared.Entities\AcTransitMap.Shared.Entities.csproj", "{B06844C1-85E3-4AB6-8E83-1735D6AE5268}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageProcessor", "MessageProcessor\MessageProcessor.csproj", "{0F10693F-15A9-476C-B6D5-68C4A1A0326C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageProcessor", "MessageProcessor\MessageProcessor.csproj", "{0F10693F-15A9-476C-B6D5-68C4A1A0326C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AcTransitMap.Database", "AcTransitMap.Database\AcTransitMap.Database.csproj", "{649899A0-5B2F-473F-83DB-D149F6C7A916}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AcTransitMap.Database", "AcTransitMap.Database\AcTransitMap.Database.csproj", "{649899A0-5B2F-473F-83DB-D149F6C7A916}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
