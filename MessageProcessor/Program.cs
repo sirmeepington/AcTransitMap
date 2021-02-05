@@ -80,7 +80,7 @@ namespace MessageProcessor
 
         private static void ConfigureRabbit(IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator rabbit, string rabbitUser, string rabbitPass)
         {
-            rabbit.Host("rabbitmq.service", "/", config =>
+            rabbit.Host(Environment.GetEnvironmentVariable("RABBIT_URL"), "/", config =>
             {
                 config.Username(rabbitUser);
                 config.Password(rabbitPass);

@@ -89,7 +89,8 @@ namespace GtfsConsumer
         {
             string rabbitUser = Environment.GetEnvironmentVariable("RABBIT_USER");
             string rabbitPass = Environment.GetEnvironmentVariable("RABBIT_PASS");
-            IConsumerBus consumer = new ConsumerBus("rabbitmq.service", rabbitUser, rabbitPass);
+            string rabbitUrl = Environment.GetEnvironmentVariable("RABBIT_URL");
+            IConsumerBus consumer = new ConsumerBus(rabbitUrl, rabbitUser, rabbitPass);
             await consumer.Start();
             return consumer;
         }

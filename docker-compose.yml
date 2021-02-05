@@ -17,6 +17,7 @@ services:
     environment:
       - RABBIT_PASS=${RABBIT_PASS}
       - RABBIT_USER=${RABBIT_USER}
+      - RABBIT_URL=rabbitmq.service
       - MONGO_CONNSTR=${MONGO_CONNSTR}
       - MONGO_DB=${MONGO_DB}
       - MONGO_COLLECTION=${MONGO_COLLECTION}
@@ -58,6 +59,7 @@ services:
     environment:
       - RABBIT_PASS=${RABBIT_PASS}
       - RABBIT_USER=${RABBIT_USER}
+      - RABBIT_URL=rabbitmq.service
       - SEQ_URL=${SEQ_URL}
       - ACTRANSIT_KEY=${ACTRANSIT_KEY}
       - FETCH_DELAY=15
@@ -75,6 +77,7 @@ services:
     environment:
       - RABBIT_PASS=${RABBIT_PASS}
       - RABBIT_USER=${RABBIT_USER}
+      - RABBIT_URL=rabbitmq.service
       - MONGO_CONNSTR=${MONGO_CONNSTR}
       - MONGO_DB=${MONGO_DB}
       - MONGO_COLLECTION=${MONGO_COLLECTION}

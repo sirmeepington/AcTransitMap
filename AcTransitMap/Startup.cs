@@ -58,7 +58,7 @@ namespace AcTransitMap
 
         private static void ConfigureRabbit(IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator rabbit, string rabbitUser, string rabbitPass)
         {
-            rabbit.Host("rabbitmq.service", "/", rabbitCfg =>
+            rabbit.Host(Environment.GetEnvironmentVariable("RABBIT_URL"), "/", rabbitCfg =>
             {
                 rabbitCfg.Username(rabbitUser);
                 rabbitCfg.Password(rabbitPass);
