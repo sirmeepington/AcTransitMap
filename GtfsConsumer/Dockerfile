@@ -6,7 +6,7 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 COPY ["GtfsConsumer/GtfsConsumer.csproj", "GtfsConsumer/"]
-COPY ["GtfsConsumer.Entities/GtfsConsumer.Entities.csproj", "GtfsConsumer.Entities/"]
+COPY ["AcTransitMap.Shared.Entities/AcTransitMap.Shared.Entities.csproj", "AcTransitMap.Shared.Entities/"]
 RUN dotnet restore "GtfsConsumer/GtfsConsumer.csproj"
 COPY . .
 WORKDIR "/src/GtfsConsumer"
