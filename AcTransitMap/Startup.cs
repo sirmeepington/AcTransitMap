@@ -6,6 +6,7 @@ using AcTransitMap.Consumers;
 using AcTransitMap.Database;
 using AcTransitMap.Hubs;
 using AcTransitMap.Services;
+using AcTransitMap.Shared.Entities;
 using GreenPipes;
 using GtfsConsumer.Entities.Interfaces;
 using MassTransit;
@@ -37,12 +38,21 @@ namespace AcTransitMap
 
             services.AddScoped<VehiclePositionConsumer>();
 
-            string rabbitUser = Environment.GetEnvironmentVariable("RABBIT_USER");
-            string rabbitPass = Environment.GetEnvironmentVariable("RABBIT_PASS");
+            RabbitConnection rabbitConnection = new RabbitConnection()
+            {
+                Endpoint = Environment.GetEnvironmentVariable("RABBIT_URL"),
+                Password = Environment.GetEnvironmentVariable("RABBIT_PASS"),
+                Username = Environment.GetEnvironmentVariable("RABBIT_USER")
+            };
+
+            if (!rabbitConnection.IsValid())
+            {
+                throw new ArgumentNullException("RabbitMQ connection details are invalid.");
+            }
 
             services.AddMassTransit(cfg =>
             {
-                cfg.UsingRabbitMq((context, rabbit) => ConfigureRabbit(context, rabbit, rabbitUser, rabbitPass));
+                cfg.UsingRabbitMq((context, rabbit) => ConfigureRabbit(context, rabbit, rabbitConnection));
             });
             services.AddMassTransitHostedService();
 
@@ -56,13 +66,9 @@ namespace AcTransitMap
             services.AddSignalR();
         }
 
-        private static void ConfigureRabbit(IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator rabbit, string rabbitUser, string rabbitPass)
+        private static void ConfigureRabbit(IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator rabbit, RabbitConnection connection)
         {
-            rabbit.Host(Environment.GetEnvironmentVariable("RABBIT_URL"), "/", rabbitCfg =>
-            {
-                rabbitCfg.Username(rabbitUser);
-                rabbitCfg.Password(rabbitPass);
-            });
+            rabbit.Host(connection);
 
             rabbit.ReceiveEndpoint(endpoint =>
             {

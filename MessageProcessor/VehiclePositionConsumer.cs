@@ -9,6 +9,13 @@ using System.Threading.Tasks;
 
 namespace MessageProcessor
 {
+    /// <summary>
+    /// A consumer for recieving raw <see cref="IVehiclePosition"/> messages
+    /// from the GTFS-RT source.
+    /// <br/>
+    /// Each message received is validated here before
+    /// being pushed through to the <see cref="IUpdaterService"/>.
+    /// </summary>
     public class VehiclePositionConsumer : IConsumer<IVehiclePosition>
     {
         private readonly IUpdaterService _updater;
@@ -18,6 +25,13 @@ namespace MessageProcessor
             _updater = updater;
         }
 
+        /// <summary>
+        /// Consumes the <see cref="IVehiclePosition"/> message and
+        /// if valid pushes it to the <see cref="IUpdaterService"/>.
+        /// </summary>
+        /// <param name="context">The <see cref="ConsumeContext"/> for the
+        /// current received message.</param>
+        /// <returns>An awaitable task for consuming a message.</returns>
         public async Task Consume(ConsumeContext<IVehiclePosition> context)
         {
             // Validate

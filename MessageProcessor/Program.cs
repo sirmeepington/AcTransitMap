@@ -1,4 +1,5 @@
 ﻿using AcTransitMap.Database;
+using AcTransitMap.Shared.Entities;
 using GtfsConsumer.Entities.Interfaces;
 using MassTransit;
 using MassTransit.RabbitMqTransport;
@@ -56,13 +57,17 @@ namespace MessageProcessor
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            string rabbitUser = Environment.GetEnvironmentVariable("RABBIT_USER");
-            string rabbitPass = Environment.GetEnvironmentVariable("RABBIT_PASS");
+            RabbitConnection rabbitConnection = new RabbitConnection()
+            {
+                Endpoint = Environment.GetEnvironmentVariable("RABBIT_URL"),
+                Password = Environment.GetEnvironmentVariable("RABBIT_PASS"),
+                Username = Environment.GetEnvironmentVariable("RABBIT_USER")
+            };
 
-            if (string.IsNullOrEmpty(rabbitUser) || string.IsNullOrEmpty(rabbitPass))
+            if (!rabbitConnection.IsValid())
             {
                 Log.Fatal("RabbitMQ User/Pass cannot be null/undefined.");
-                throw new ArgumentNullException("RabbitMQ User & Pass cannot be null.");
+                throw new ArgumentNullException("RabbitMQ connection details are invalid.");
             }
 
             string mongoUrl = Environment.GetEnvironmentVariable("MONGO_CONNSTR");
@@ -74,17 +79,20 @@ namespace MessageProcessor
             services.AddScoped<VehiclePositionConsumer>(); // Necessary to prevent MT DI faults.
             services.AddMassTransit(mt =>
             {
-                mt.UsingRabbitMq((context, rabbit) => ConfigureRabbit(context, rabbit, rabbitUser, rabbitPass));
+                mt.UsingRabbitMq((context, rabbit) => ConfigureRabbit(context, rabbit, rabbitConnection));
             });
         }
 
-        private static void ConfigureRabbit(IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator rabbit, string rabbitUser, string rabbitPass)
+        /// <summary>
+        /// Configures the RabbitMQ message broker with settings specified by the 
+        /// <paramref name="connection"/> object
+        /// </summary>
+        /// <param name="context">The <see cref="IBusRegistrationContext"/> for the bus</param>
+        /// <param name="rabbit">The <see cref="IRabbitMqBusFactoryConfigurator"/> configuration</param>
+        /// <param name="connection">The <see cref="RabbitConnection"/> details.</param>
+        private static void ConfigureRabbit(IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator rabbit, RabbitConnection connection)
         {
-            rabbit.Host(Environment.GetEnvironmentVariable("RABBIT_URL"), "/", config =>
-            {
-                config.Username(rabbitUser);
-                config.Password(rabbitPass);
-            });
+            rabbit.Host(connection);
             rabbit.ReceiveEndpoint(endpoint =>
             {
                 endpoint.Bind<IVehiclePosition>();
