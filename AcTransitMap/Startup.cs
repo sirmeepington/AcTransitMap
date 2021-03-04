@@ -1,19 +1,14 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AcTransitMap.Consumers;
 using AcTransitMap.Database;
 using AcTransitMap.Hubs;
 using AcTransitMap.Services;
 using AcTransitMap.Shared.Entities;
-using GreenPipes;
 using GtfsConsumer.Entities.Interfaces;
 using MassTransit;
 using MassTransit.RabbitMqTransport;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -37,7 +32,21 @@ namespace AcTransitMap
             services.AddHostedService<PositionUpdaterService>();
 
             services.AddScoped<VehiclePositionConsumer>();
+            
+            ConfigureRabbit(services);
 
+            string mongoUrl = Environment.GetEnvironmentVariable("MONGO_CONNSTR");
+            string mongoDb = Environment.GetEnvironmentVariable("MONGO_DB");
+            string mongoColl = Environment.GetEnvironmentVariable("MONGO_COLLECTION");
+
+            services.AddSingleton<IDbConnector<UpdatedVehiclePosition, string>, MongoDbConnector>(x => new MongoDbConnector(mongoUrl, mongoDb, mongoColl));
+            services.AddSingleton<IPositionService, PositionService>();
+
+            services.AddSignalR();
+        }
+
+        private static void ConfigureRabbit(IServiceCollection services)
+        {
             RabbitConnection rabbitConnection = new RabbitConnection()
             {
                 Endpoint = Environment.GetEnvironmentVariable("RABBIT_URL"),
@@ -52,21 +61,12 @@ namespace AcTransitMap
 
             services.AddMassTransit(cfg =>
             {
-                cfg.UsingRabbitMq((context, rabbit) => ConfigureRabbit(context, rabbit, rabbitConnection));
+                cfg.UsingRabbitMq((context, rabbit) => InitializeRabbit(context, rabbit, rabbitConnection));
             });
             services.AddMassTransitHostedService();
-
-            string mongoUrl = Environment.GetEnvironmentVariable("MONGO_CONNSTR");
-            string mongoDb = Environment.GetEnvironmentVariable("MONGO_DB");
-            string mongoColl = Environment.GetEnvironmentVariable("MONGO_COLLECTION");
-
-            services.AddSingleton<IDbConnector<UpdatedVehiclePosition, string>, MongoDbConnector>(x => new MongoDbConnector(mongoUrl,mongoDb,mongoColl));
-            services.AddSingleton<IPositionService, PositionService>();
-
-            services.AddSignalR();
         }
 
-        private static void ConfigureRabbit(IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator rabbit, RabbitConnection connection)
+        private static void InitializeRabbit(IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator rabbit, RabbitConnection connection)
         {
             rabbit.Host(connection);
 
