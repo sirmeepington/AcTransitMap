@@ -27,8 +27,11 @@ namespace GtfsConsumer
             {
                 // Call every 30s
                 Log.Information("Beginning GTFS-RT gather timer.");
-                Timer timer = new Timer(new TimerCallback(service.Publish), null, 0, GetDelay());
-                await Task.Delay(Timeout.Infinite);
+                while (true) // God help me
+                {
+                    await service.Publish();
+                    await Task.Delay(GetDelay());
+                }
             } catch (Exception ex)
             {
                 Log.Error(ex, "Exception occured while publishing GTFS-RT feed: {ExceptionMessage}.", ex.Message);
@@ -89,7 +92,8 @@ namespace GtfsConsumer
         {
             string rabbitUser = Environment.GetEnvironmentVariable("RABBIT_USER");
             string rabbitPass = Environment.GetEnvironmentVariable("RABBIT_PASS");
-            IConsumerBus consumer = new ConsumerBus("rabbitmq.service", rabbitUser, rabbitPass);
+            string rabbitUrl = Environment.GetEnvironmentVariable("RABBIT_URL");
+            IConsumerBus consumer = new ConsumerBus(rabbitUrl, rabbitUser, rabbitPass);
             await consumer.Start();
             return consumer;
         }

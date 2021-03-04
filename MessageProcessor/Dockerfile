@@ -7,7 +7,7 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 COPY ["MessageProcessor/MessageProcessor.csproj", "MessageProcessor/"]
 COPY ["AcTransitMap.Database/AcTransitMap.Database.csproj", "AcTransitMap.Database/"]
-COPY ["GtfsConsumer.Entities/GtfsConsumer.Entities.csproj", "GtfsConsumer.Entities/"]
+COPY ["AcTransitMap.Shared.Entities/AcTransitMap.Shared.Entities.csproj", "AcTransitMap.Shared.Entities/"]
 RUN dotnet restore "MessageProcessor/MessageProcessor.csproj"
 COPY . .
 WORKDIR "/src/MessageProcessor"

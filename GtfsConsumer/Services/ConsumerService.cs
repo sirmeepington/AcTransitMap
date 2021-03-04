@@ -27,7 +27,7 @@ namespace GtfsConsumer.Services
         /// GTFS feed and publishes it to the bus.
         /// </summary>
         /// <param name="state"></param>
-        public async void Publish(object state)
+        public async Task Publish()
         {
             Log.Information("Gathering GTFS-RT vehicle information");
             IEnumerable<IVehiclePosition> vehicles;

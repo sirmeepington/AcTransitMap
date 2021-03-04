@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace MessageProcessor
 {
+    /// <inheritdoc cref="IUpdaterService"/>
     public class UpdaterService : IUpdaterService
     {
 
@@ -19,6 +20,7 @@ namespace MessageProcessor
             _bus = bus;
         }
 
+        /// <inheritdoc/>
         public async Task Update(IVehiclePosition message)
         {
             IUpdatedVehiclePosition newVehiclePos = new UpdatedVehiclePosition()
