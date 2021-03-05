@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessageProcessor", "Message
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AcTransitMap.Database", "AcTransitMap.Database\AcTransitMap.Database.csproj", "{649899A0-5B2F-473F-83DB-D149F6C7A916}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageProcessor.Tests", "MessageProcessor.Tests\MessageProcessor.Tests.csproj", "{B89310AE-9CF4-4ECB-9FEF-113D574F0311}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{649899A0-5B2F-473F-83DB-D149F6C7A916}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{649899A0-5B2F-473F-83DB-D149F6C7A916}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{649899A0-5B2F-473F-83DB-D149F6C7A916}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B89310AE-9CF4-4ECB-9FEF-113D574F0311}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B89310AE-9CF4-4ECB-9FEF-113D574F0311}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B89310AE-9CF4-4ECB-9FEF-113D574F0311}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B89310AE-9CF4-4ECB-9FEF-113D574F0311}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

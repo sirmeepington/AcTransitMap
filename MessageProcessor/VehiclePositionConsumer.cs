@@ -40,7 +40,7 @@ namespace MessageProcessor
             if (!message.IsValid(out string msg))
             {
                 Log.Error("Invalid message for vehicle {VehicleId} passed. {Message}", message.VehicleId ?? "No Vehicle Id", msg);
-                return;
+                throw new MessageDataException(msg);
             }
 
             await _updater.Update(context.Message);
